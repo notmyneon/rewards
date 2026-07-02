@@ -1,1 +1,458 @@
-<iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfeDT41SvGb1z7qFSgKJ_dXuLt8hEPeOm92DXGEXhEgxsV8jg/viewform?embedded=true" width="640" height="4543" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>The Survey Vault</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #101820, #1f3b4d);
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      padding: 40px 20px 20px;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      margin: 0 0 12px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.92;
+      max-width: 760px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .date-box {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: bold;
+    }
+
+    .form-container {
+      width: 94%;
+      max-width: 900px;
+      margin: 30px auto 20px;
+      background: white;
+      border-radius: 18px;
+      padding: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    iframe {
+      width: 100%;
+      min-height: 4543px;
+      border: none;
+      border-radius: 12px;
+    }
+
+    .seal-button {
+      margin: 20px auto 60px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+      background: #f6c453;
+      color: #101820;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .seal-button:hover {
+      transform: scale(1.04);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .seal-button:active {
+      transform: scale(0.98);
+    }
+
+    .vault-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 8, 12, 0.94);
+      z-index: 999;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    .vault-overlay.show {
+      display: flex;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .vault-scene {
+      text-align: center;
+      max-width: 560px;
+    }
+
+    .vault {
+      width: 280px;
+      height: 280px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #6f7f88, #28343b 65%, #12191d);
+      border: 14px solid #8b9ca6;
+      position: relative;
+      box-shadow:
+        inset 0 0 30px rgba(255, 255, 255, 0.15),
+        0 0 50px rgba(0, 0, 0, 0.7);
+      animation: vaultClose 1.2s ease-in-out forwards;
+    }
+
+    .vault::before {
+      content: "";
+      position: absolute;
+      inset: 55px;
+      border-radius: 50%;
+      border: 10px solid #c7d0d5;
+      background: radial-gradient(circle, #4c5b63, #202a30);
+    }
+
+    .vault::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      border: 4px dashed rgba(255, 255, 255, 0.22);
+    }
+
+    .vault-handle {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      top: 66px;
+      left: 66px;
+      border: 12px solid #d9e1e5;
+      border-radius: 50%;
+      box-sizing: border-box;
+      animation: spinHandle 1.1s ease-in-out forwards;
+      z-index: 2;
+    }
+
+    .vault-handle::before,
+    .vault-handle::after {
+      content: "";
+      position: absolute;
+      background: #d9e1e5;
+      border-radius: 8px;
+      left: 50%;
+      top: 50%;
+      transform-origin: center;
+    }
+
+    .vault-handle::before {
+      width: 110px;
+      height: 12px;
+      transform: translate(-50%, -50%);
+    }
+
+    .vault-handle::after {
+      width: 12px;
+      height: 110px;
+      transform: translate(-50%, -50%);
+    }
+
+    .lock-message {
+      font-size: 1.9rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: messageAppear 0.8s ease forwards;
+      animation-delay: 1.2s;
+    }
+
+    .lock-submessage {
+      font-size: 1.08rem;
+      line-height: 1.5;
+      opacity: 0;
+      animation: messageAppear 0.8s ease forwards;
+      animation-delay: 1.5s;
+    }
+
+    .close-overlay-button {
+      margin-top: 28px;
+      padding: 12px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      cursor: pointer;
+      opacity: 0;
+      animation: messageAppear 0.8s ease forwards;
+      animation-delay: 1.8s;
+    }
+
+    .close-overlay-button:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #f6c453;
+      border-radius: 50%;
+      opacity: 0;
+      animation: sparkle 1.2s ease-in-out infinite;
+    }
+
+    .sparkle.one {
+      top: 25%;
+      left: 25%;
+      animation-delay: 0.2s;
+    }
+
+    .sparkle.two {
+      top: 30%;
+      right: 22%;
+      animation-delay: 0.5s;
+    }
+
+    .sparkle.three {
+      bottom: 28%;
+      left: 30%;
+      animation-delay: 0.8s;
+    }
+
+    .sparkle.four {
+      bottom: 25%;
+      right: 30%;
+      animation-delay: 1s;
+    }
+
+    footer {
+      padding: 0 20px 40px;
+      opacity: 0.75;
+      font-size: 0.95rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes vaultClose {
+      0% {
+        transform: scale(1.2) rotate(-4deg);
+        filter: brightness(1.4);
+      }
+
+      70% {
+        transform: scale(1) rotate(2deg);
+        filter: brightness(1);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+        filter: brightness(0.85);
+      }
+    }
+
+    @keyframes spinHandle {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(540deg);
+      }
+    }
+
+    @keyframes messageAppear {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.4);
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .form-container {
+        width: 96%;
+        padding: 6px;
+      }
+
+      iframe {
+        min-height: 4543px;
+      }
+
+      .vault {
+        width: 220px;
+        height: 220px;
+      }
+
+      .vault::before {
+        inset: 43px;
+      }
+
+      .vault-handle {
+        width: 95px;
+        height: 95px;
+        top: 50px;
+        left: 50px;
+      }
+
+      .vault-handle::before {
+        width: 88px;
+      }
+
+      .vault-handle::after {
+        height: 88px;
+      }
+
+      .lock-message {
+        font-size: 1.5rem;
+      }
+
+      .lock-submessage {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>The Survey Vault</h1>
+
+    <p class="subtitle">
+      Complete the survey below. Once your response is submitted, it will be sealed away until reveal day.
+    </p>
+
+    <div class="date-box">
+      Results locked until reveal day
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <iframe
+        id="surveyFrame"
+        src="https://docs.google.com/forms/d/e/1FAIpQLSfeDT41SvGb1z7qFSgKJ_dXuLt8hEPeOm92DXGEXhEgxsV8jg/viewform?embedded=true">
+        Loading…
+      </iframe>
+    </div>
+
+    <button class="seal-button" onclick="showVault()">
+      I submitted my response. Seal the vault!
+    </button>
+  </main>
+
+  <div id="vaultOverlay" class="vault-overlay">
+    <div class="sparkle one"></div>
+    <div class="sparkle two"></div>
+    <div class="sparkle three"></div>
+    <div class="sparkle four"></div>
+
+    <div class="vault-scene">
+      <div class="vault">
+        <div class="vault-handle"></div>
+      </div>
+
+      <div class="lock-message">
+        Response sealed.
+      </div>
+
+      <div class="lock-submessage">
+        Your answer has been locked in the vault. Results will stay hidden until reveal day.
+      </div>
+
+      <button class="close-overlay-button" onclick="hideVault()">
+        Back to survey page
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    Results will be released only after the official reveal date.
+  </footer>
+
+  <script>
+    const surveyFrame = document.getElementById("surveyFrame");
+    const vaultOverlay = document.getElementById("vaultOverlay");
+
+    let iframeLoadCount = 0;
+    let vaultAlreadyShown = false;
+
+    surveyFrame.addEventListener("load", () => {
+      iframeLoadCount++;
+
+      /*
+        First load: the form loads.
+        Second load: usually the Google Forms confirmation screen after submission.
+
+        Because Google Forms is embedded in an iframe, this is not perfect,
+        so the manual "Seal the vault" button is also included.
+      */
+
+      if (iframeLoadCount > 1 && !vaultAlreadyShown) {
+        setTimeout(showVault, 700);
+      }
+    });
+
+    function showVault() {
+      if (vaultAlreadyShown) return;
+
+      vaultAlreadyShown = true;
+      vaultOverlay.classList.add("show");
+    }
+
+    function hideVault() {
+      vaultOverlay.classList.remove("show");
+    }
+  </script>
+</body>
+</html>
