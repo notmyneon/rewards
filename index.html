@@ -11,12 +11,15 @@
       --bg-dark: #060b14;
       --bg-mid: #111826;
       --bg-panel: #1a2232;
+
       --accent-red: #a00032;
       --accent-red-dark: #6d0022;
       --accent-red-light: #c4003d;
+
       --silver: #d9dde3;
       --silver-dark: #9da6b2;
       --white: #f7f9fc;
+
       --shadow: rgba(0, 0, 0, 0.45);
     }
 
@@ -30,7 +33,7 @@
       color: var(--white);
       text-align: center;
       background:
-        radial-gradient(circle at top, rgba(160, 0, 50, 0.22), transparent 35%),
+        radial-gradient(circle at top, rgba(160, 0, 50, 0.24), transparent 36%),
         linear-gradient(135deg, var(--bg-dark), var(--bg-mid) 45%, #0a1020 100%);
     }
 
@@ -149,6 +152,7 @@
       text-align: center;
       max-width: 580px;
       position: relative;
+      z-index: 6;
     }
 
     .vault {
@@ -189,11 +193,12 @@
       position: absolute;
       width: 118px;
       height: 118px;
-      top: 76px;
-      left: 76px;
+      top: 50%;
+      left: 50%;
       border: 12px solid var(--silver);
       border-radius: 50%;
       z-index: 2;
+      transform: translate(-50%, -50%);
       animation: spinHandle 1.1s ease-in-out forwards;
     }
 
@@ -222,15 +227,86 @@
 
     .vault-logo {
       position: absolute;
-      width: 110px;
+      width: 112px;
       height: auto;
-      top: 95px;
-      left: 95px;
+      top: 50%;
+      left: 50%;
       z-index: 3;
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+      opacity: 0;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
       animation: logoAppear 0.8s ease forwards;
       animation-delay: 0.3s;
-      opacity: 0;
+    }
+
+    .bars-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bars-panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: stretch;
+      background: rgba(8, 12, 20, 0.04);
+    }
+
+    .bars-left {
+      left: 0;
+      transform: translateX(-105%);
+    }
+
+    .bars-right {
+      right: 0;
+      transform: translateX(105%);
+    }
+
+    .bars-panel span {
+      display: block;
+      width: 12px;
+      height: 100%;
+      background: linear-gradient(180deg, #e1e5ea 0%, #8e98a5 45%, #d7dde3 100%);
+      box-shadow:
+        0 0 10px rgba(255, 255, 255, 0.18),
+        inset -2px 0 2px rgba(0, 0, 0, 0.35),
+        inset 2px 0 2px rgba(255, 255, 255, 0.18);
+    }
+
+    .bars-panel::before,
+    .bars-panel::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 18px;
+      background: linear-gradient(180deg, #c8d0d7 0%, #6f7a87 100%);
+      box-shadow:
+        inset 0 2px 2px rgba(255, 255, 255, 0.18),
+        0 2px 8px rgba(0, 0, 0, 0.32);
+    }
+
+    .bars-panel::before {
+      top: 20%;
+    }
+
+    .bars-panel::after {
+      bottom: 20%;
+    }
+
+    .vault-overlay.show .bars-left {
+      animation: slamLeft 0.72s cubic-bezier(0.18, 0.9, 0.2, 1.08) forwards;
+      animation-delay: 0.62s;
+    }
+
+    .vault-overlay.show .bars-right {
+      animation: slamRight 0.72s cubic-bezier(0.18, 0.9, 0.2, 1.08) forwards;
+      animation-delay: 0.62s;
     }
 
     .lock-message {
@@ -263,6 +339,8 @@
       opacity: 0;
       animation: messageAppear 0.8s ease forwards;
       animation-delay: 1.75s;
+      position: relative;
+      z-index: 20;
     }
 
     .close-overlay-button:hover {
@@ -278,6 +356,7 @@
       opacity: 0;
       animation: sparkle 1.25s ease-in-out infinite;
       box-shadow: 0 0 14px rgba(196, 0, 61, 0.8);
+      z-index: 11;
     }
 
     .sparkle.one {
@@ -311,8 +390,13 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes vaultClose {
@@ -320,10 +404,12 @@
         transform: scale(1.18) rotate(-4deg);
         filter: brightness(1.4);
       }
+
       70% {
         transform: scale(1) rotate(2deg);
         filter: brightness(1);
       }
+
       100% {
         transform: scale(1) rotate(0deg);
         filter: brightness(0.88);
@@ -331,8 +417,25 @@
     }
 
     @keyframes spinHandle {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(540deg); }
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) rotate(540deg);
+      }
+    }
+
+    @keyframes logoAppear {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.78);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
     }
 
     @keyframes messageAppear {
@@ -340,6 +443,7 @@
         opacity: 0;
         transform: translateY(12px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -351,20 +455,38 @@
         opacity: 0;
         transform: scale(0.5);
       }
+
       50% {
         opacity: 1;
         transform: scale(1.45);
       }
     }
 
-    @keyframes logoAppear {
-      from {
-        opacity: 0;
-        transform: scale(0.8);
+    @keyframes slamLeft {
+      0% {
+        transform: translateX(-105%);
       }
-      to {
-        opacity: 1;
-        transform: scale(1);
+
+      78% {
+        transform: translateX(3%);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slamRight {
+      0% {
+        transform: translateX(105%);
+      }
+
+      78% {
+        transform: translateX(-3%);
+      }
+
+      100% {
+        transform: translateX(0);
       }
     }
 
@@ -398,8 +520,6 @@
       .vault-handle {
         width: 92px;
         height: 92px;
-        top: 55px;
-        left: 55px;
       }
 
       .vault-handle::before {
@@ -411,9 +531,16 @@
       }
 
       .vault-logo {
-        width: 82px;
-        top: 74px;
-        left: 74px;
+        width: 84px;
+      }
+
+      .bars-panel span {
+        width: 9px;
+      }
+
+      .bars-panel::before,
+      .bars-panel::after {
+        height: 14px;
       }
 
       .lock-message {
@@ -465,6 +592,24 @@
     <div class="sparkle three"></div>
     <div class="sparkle four"></div>
 
+    <div class="bars-overlay">
+      <div class="bars-panel bars-left">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="bars-panel bars-right">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
     <div class="vault-scene">
       <div class="vault">
         <div class="vault-handle"></div>
@@ -500,9 +645,6 @@
     surveyFrame.addEventListener("load", () => {
       iframeLoadCount++;
 
-      // First load is the form.
-      // A later load is often the confirmation page after submission.
-      // The manual button is still included in case auto-detect misses it.
       if (iframeLoadCount > 1 && !vaultAlreadyShown) {
         setTimeout(showVault, 700);
       }
@@ -510,6 +652,7 @@
 
     function showVault() {
       if (vaultAlreadyShown) return;
+
       vaultAlreadyShown = true;
       vaultOverlay.classList.add("show");
     }
