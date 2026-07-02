@@ -10,16 +10,12 @@
     :root {
       --bg-dark: #060b14;
       --bg-mid: #111826;
-      --bg-panel: #1a2232;
-
       --accent-red: #a00032;
       --accent-red-dark: #6d0022;
       --accent-red-light: #c4003d;
-
       --silver: #d9dde3;
       --silver-dark: #9da6b2;
       --white: #f7f9fc;
-
       --shadow: rgba(0, 0, 0, 0.45);
     }
 
@@ -83,7 +79,7 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 22px;
-      padding: 18px 18px 30px;
+      padding: 18px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
       backdrop-filter: blur(6px);
     }
@@ -103,30 +99,12 @@
       border-radius: 12px;
     }
 
-    .button-row {
-      margin-top: 22px;
-    }
-
-    .seal-button {
-      padding: 15px 26px;
-      font-size: 1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--accent-red-light), var(--accent-red-dark));
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(109, 0, 34, 0.5);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .seal-button:hover {
-      transform: scale(1.04);
-      box-shadow: 0 14px 28px rgba(109, 0, 34, 0.6);
-    }
-
-    .seal-button:active {
-      transform: scale(0.98);
+    .auto-note {
+      margin: 20px auto 10px;
+      max-width: 780px;
+      font-size: 0.98rem;
+      line-height: 1.45;
+      color: rgba(247, 249, 252, 0.78);
     }
 
     .vault-overlay {
@@ -176,8 +154,7 @@
       inset: 55px;
       border-radius: 50%;
       border: 10px solid var(--silver);
-      background:
-        radial-gradient(circle, #4c5865, #1d2730);
+      background: radial-gradient(circle, #4c5865, #1d2730);
       z-index: 1;
     }
 
@@ -390,13 +367,8 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes vaultClose {
@@ -463,31 +435,15 @@
     }
 
     @keyframes slamLeft {
-      0% {
-        transform: translateX(-105%);
-      }
-
-      78% {
-        transform: translateX(3%);
-      }
-
-      100% {
-        transform: translateX(0);
-      }
+      0% { transform: translateX(-105%); }
+      78% { transform: translateX(3%); }
+      100% { transform: translateX(0); }
     }
 
     @keyframes slamRight {
-      0% {
-        transform: translateX(105%);
-      }
-
-      78% {
-        transform: translateX(-3%);
-      }
-
-      100% {
-        transform: translateX(0);
-      }
+      0% { transform: translateX(105%); }
+      78% { transform: translateX(-3%); }
+      100% { transform: translateX(0); }
     }
 
     @media (max-width: 700px) {
@@ -501,7 +457,7 @@
 
       .page-shell {
         width: 97%;
-        padding: 12px 12px 24px;
+        padding: 12px;
       }
 
       iframe {
@@ -562,7 +518,7 @@
 
     <p class="subtitle">
       Cast your vote in the NiceHL Pre-season Rewards Survey. Once your response is submitted,
-      it will be sealed in the vault until the official reveal day.
+      your vote will be sealed automatically in the NiceHL vault.
     </p>
 
     <div class="date-box">
@@ -579,11 +535,9 @@
       </iframe>
     </div>
 
-    <div class="button-row">
-      <button class="seal-button" onclick="showVault()">
-        I submitted my vote. Seal the vault!
-      </button>
-    </div>
+    <p class="auto-note">
+      After submitting the survey, wait a moment on the confirmation screen. The vault will close automatically.
+    </p>
   </main>
 
   <div id="vaultOverlay" class="vault-overlay">
@@ -638,15 +592,53 @@
   <script>
     const surveyFrame = document.getElementById("surveyFrame");
     const vaultOverlay = document.getElementById("vaultOverlay");
+    const formContainer = document.querySelector(".form-container");
 
     let iframeLoadCount = 0;
     let vaultAlreadyShown = false;
 
+    let userFocusedForm = false;
+    let reachedSubmitZone = false;
+
+    const pageStartTime = Date.now();
+
+    function checkSubmitZone() {
+      const documentHeight = document.documentElement.scrollHeight;
+      const currentBottom = window.scrollY + window.innerHeight;
+      const nearBottomOfPage = documentHeight - currentBottom < 900;
+
+      const formTop = formContainer.offsetTop;
+      const pastMostOfForm = window.scrollY > formTop + 3000;
+
+      if (nearBottomOfPage || pastMostOfForm) {
+        reachedSubmitZone = true;
+      }
+    }
+
+    window.addEventListener("scroll", checkSubmitZone, { passive: true });
+
+    window.addEventListener("blur", () => {
+      setTimeout(() => {
+        if (document.activeElement === surveyFrame) {
+          userFocusedForm = true;
+        }
+      }, 0);
+    });
+
     surveyFrame.addEventListener("load", () => {
       iframeLoadCount++;
 
-      if (iframeLoadCount > 1 && !vaultAlreadyShown) {
-        setTimeout(showVault, 700);
+      const pageHasBeenOpenLongEnough = Date.now() - pageStartTime > 5000;
+      const notInitialLoad = iframeLoadCount > 1;
+
+      if (
+        notInitialLoad &&
+        pageHasBeenOpenLongEnough &&
+        userFocusedForm &&
+        reachedSubmitZone &&
+        !vaultAlreadyShown
+      ) {
+        setTimeout(showVault, 800);
       }
     });
 
